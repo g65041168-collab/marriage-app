@@ -35,7 +35,7 @@ function App() {
   }, [chatOpen, chatRecipient]);
 
   const fetchProfiles = async () => {
-    try { const res = await axios.get('http://localhost:5000/api/profiles'); setProfiles(res.data); } catch (error) { console.error(error); }
+    try { const res = await axios.get('https://marriage-app-gtge.onrender.com/api/profiles'); setProfiles(res.data); } catch (error) { console.error(error); }
   };
 
   const handleAuthChange = (e) => setAuthData({ ...authData, [e.target.name]: e.target.value });
@@ -45,7 +45,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/login', authData);
+      const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setToken(res.data.token);
@@ -57,7 +57,7 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/register', { ...authData, ...formData });
+      await axios.post('https://marriage-app-gtge.onrender.com/api/register', { ...authData, ...formData });
       alert('Registered! Please Login.');
       setAuthMode('login');
     } catch (err) { alert('Registration Failed'); }
@@ -74,7 +74,7 @@ function App() {
 
   const fetchChatHistory = async (recipientEmail) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/chat/${currentUser.email}/${recipientEmail}`);
+      const res = await axios.get(`https://marriage-app-gtge.onrender.com/api/chat/${currentUser.email}/${recipientEmail}`);
       setChatMessages(res.data);
     } catch (err) { console.log(err); }
   };
@@ -83,7 +83,7 @@ function App() {
     e.preventDefault();
     if (!messageText.trim()) return;
     try {
-      await axios.post('http://localhost:5000/api/chat/send', {
+      await axios.post('https://marriage-app-gtge.onrender.com/api/chat/send', {
         senderEmail: currentUser.email,
         receiverEmail: chatRecipient.email,
         text: messageText
@@ -96,12 +96,12 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isEditing) {
-      try { await axios.put(`http://localhost:5000/api/update/${currentId}`, formData); alert('Updated!'); setIsEditing(false); fetchProfiles(); } catch (err) { alert('Error'); }
+      try { await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, formData); alert('Updated!'); setIsEditing(false); fetchProfiles(); } catch (err) { alert('Error'); }
     }
   };
   const handleEdit = (e, user) => { e.stopPropagation(); setFormData(user); setIsEditing(true); setCurrentId(user._id); window.scrollTo(0,0); };
-  const handleDelete = async (e, id) => { e.stopPropagation(); if(window.confirm("Delete?")) { await axios.delete(`http://localhost:5000/api/delete/${id}`); fetchProfiles(); } };
-  const handleLike = async (e, id) => { e.stopPropagation(); await axios.put(`http://localhost:5000/api/like/${id}`); fetchProfiles(); };
+  const handleDelete = async (e, id) => { e.stopPropagation(); if(window.confirm("Delete?")) { await axios.delete(`https://marriage-app-gtge.onrender.com/api/delete/${id}`); fetchProfiles(); } };
+  const handleLike = async (e, id) => { e.stopPropagation(); await axios.put(`https://marriage-app-gtge.onrender.com/api/like/${id}`); fetchProfiles(); };
   const toggleDetails = (id) => setExpandedProfileId(expandedProfileId === id ? null : id);
   const openWhatsApp = (e, num) => { e.stopPropagation(); window.open(`https://wa.me/${num}`, '_blank'); };
 
