@@ -179,7 +179,7 @@ function App() {
       <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', backgroundColor:'#fff0f3', padding:'20px'}}>
         <div style={{background:'white', padding:'30px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.1)', width:'400px'}}>
           <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', marginBottom:'20px'}}>
-             <img src="https://cdn-icons-png.flaticon.com/512/3662/3662369.png" alt="logo" style={{width:'40px'}}/>
+             <img src="https://cdn-icons-png.flaticon.com/512/5460/5460463.png" alt="logo" style={{width:'40px'}}/>
              <h2 style={{color:'#ff4d6d', margin:0}}>Jatav Vivah Sampann</h2>
           </div>
           <h3 style={{textAlign:'center'}}>{authMode === 'login' ? 'Login' : 'Create Account'}</h3>
@@ -211,7 +211,7 @@ function App() {
     <div className="App">
       <header className="header" style={{backgroundColor: '#ff4d6d', padding: '15px', color: 'white', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
         <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-          <img src="https://cdn-icons-png.flaticon.com/512/3662/3662369.png" alt="logo" style={{width:'30px'}}/>
+          <img src="https://cdn-icons-png.flaticon.com/512/5460/5460463.png" alt="logo" style={{width:'30px'}}/>
           <h2 style={{margin:0}}>Jatav Vivah Sampann</h2>
         </div>
         <div>
