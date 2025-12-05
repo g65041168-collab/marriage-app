@@ -211,7 +211,7 @@ function App() {
     <div className="App">
       <header className="header" style={{backgroundColor: '#ff4d6d', padding: '15px', color: 'white', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
         <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-          <img src="https://cdn-icons-png.flaticon.com/512/5460/5460463.png" alt="logo" style={{width:'30px'}}/>
+          <img src="<span style={{fontSize:'35px'}}>💍</span>" alt="logo" style={{width:'30px'}}/>
           <h2 style={{margin:0}}>Jatav Vivah Sampann</h2>
         </div>
         <div>
