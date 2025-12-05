@@ -11,7 +11,18 @@ function App() {
   const [profiles, setProfiles] = useState([]);
   const [expandedProfileId, setExpandedProfileId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState({});
+  
+  // Full form state for Registration & Editing
+  const initialFormState = {
+    name: '', gender: 'Male', dob: '', height: '', weight: '', complexion: '',
+    education: '', standard: '', occupation: '', mobile: '', photo: '', bio: '',
+    religion: '', caste: '', foodType: 'Veg', hobbies: '',
+    village: '', town: '', district: '', city: '', state: '', country: '',
+    fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '',
+    siblings: '', siblingsOccupation: ''
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
@@ -39,7 +50,6 @@ function App() {
   };
 
   const handleAuthChange = (e) => setAuthData({ ...authData, [e.target.name]: e.target.value });
-  const handleProfileChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleLogin = async (e) => {
@@ -60,6 +70,7 @@ function App() {
       await axios.post('https://marriage-app-gtge.onrender.com/api/register', { ...authData, ...formData });
       alert('Registered! Please Login.');
       setAuthMode('login');
+      setFormData(initialFormState); // Reset form
     } catch (err) { alert('Registration Failed'); }
   };
 
@@ -105,45 +116,107 @@ function App() {
   const toggleDetails = (id) => setExpandedProfileId(expandedProfileId === id ? null : id);
   const openWhatsApp = (e, num) => { e.stopPropagation(); window.open(`https://wa.me/${num}`, '_blank'); };
 
-  // RENDER LOGIN
+  // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
+  const ProfileFormFields = () => (
+    <>
+      <h4 style={sectionHeader}>Personal</h4>
+      <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required style={inputStyle} />
+      <div style={gridStyle}>
+        <select name="gender" value={formData.gender} onChange={handleChange} style={inputStyle}>
+          <option value="Male">Male</option><option value="Female">Female</option>
+        </select>
+        <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="height" placeholder="Height" value={formData.height} onChange={handleChange} style={inputStyle} />
+        <input name="weight" placeholder="Weight" value={formData.weight} onChange={handleChange} style={inputStyle} />
+      </div>
+      <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
+      <div style={gridStyle}>
+        <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
+        <input name="standard" placeholder="Class/Grade" value={formData.standard} onChange={handleChange} style={inputStyle} />
+      </div>
+      <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
+      <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
+      <input name="photo" placeholder="Photo URL" value={formData.photo} onChange={handleChange} style={inputStyle} />
+
+      <h4 style={sectionHeader}>Family</h4>
+      <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
+      <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
+      <input name="motherName" placeholder="Mother's Name" value={formData.motherName} onChange={handleChange} style={inputStyle} />
+      <input name="siblings" placeholder="Siblings" value={formData.siblings} onChange={handleChange} style={inputStyle} />
+
+      <h4 style={sectionHeader}>Address</h4>
+      <div style={gridStyle}>
+        <input name="village" placeholder="Village" value={formData.village} onChange={handleChange} style={inputStyle} />
+        <input name="town" placeholder="Town" value={formData.town} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="district" placeholder="District" value={formData.district} onChange={handleChange} style={inputStyle} />
+        <input name="city" placeholder="City" value={formData.city} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="state" placeholder="State" value={formData.state} onChange={handleChange} style={inputStyle} />
+        <input name="country" placeholder="Country" value={formData.country} onChange={handleChange} style={inputStyle} />
+      </div>
+
+      <h4 style={sectionHeader}>Other</h4>
+      <div style={gridStyle}>
+        <input name="religion" placeholder="Religion" value={formData.religion} onChange={handleChange} style={inputStyle} />
+        <input name="caste" placeholder="Caste" value={formData.caste} onChange={handleChange} style={inputStyle} />
+      </div>
+      <select name="foodType" value={formData.foodType} onChange={handleChange} style={inputStyle}>
+          <option value="Veg">Vegetarian</option><option value="Non-Veg">Non-Vegetarian</option><option value="Vegan">Vegan</option>
+      </select>
+      <input name="hobbies" placeholder="Hobbies" value={formData.hobbies} onChange={handleChange} style={inputStyle} />
+      <textarea name="bio" placeholder="Bio / About Me" value={formData.bio} onChange={handleChange} style={{...inputStyle, height: '60px'}} />
+    </>
+  );
+
+  // RENDER LOGIN / REGISTER
   if (!token) {
     return (
-      <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', backgroundColor:'#fff0f3'}}>
+      <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', backgroundColor:'#fff0f3', padding:'20px'}}>
         <div style={{background:'white', padding:'30px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.1)', width:'400px'}}>
-          <h2 style={{color:'#ff4d6d', textAlign:'center'}}>💍 Jatav Vivah Sampann</h2>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', marginBottom:'20px'}}>
+             <img src="https://cdn-icons-png.flaticon.com/512/3662/3662369.png" alt="logo" style={{width:'40px'}}/>
+             <h2 style={{color:'#ff4d6d', margin:0}}>Jatav Vivah Sampann</h2>
+          </div>
           <h3 style={{textAlign:'center'}}>{authMode === 'login' ? 'Login' : 'Create Account'}</h3>
+          
           <form onSubmit={authMode === 'login' ? handleLogin : handleRegister} style={{display:'flex', flexDirection:'column', gap:'15px'}}>
-            <input name="email" type="email" placeholder="Email" onChange={handleAuthChange} required style={inputStyle} />
+            <input name="email" type="email" placeholder="Email Address" onChange={handleAuthChange} required style={inputStyle} />
             <input name="password" type="password" placeholder="Password" onChange={handleAuthChange} required style={inputStyle} />
+            
+            {/* Show ALL Profile fields when Registering */}
             {authMode === 'register' && (
-              <>
-                <hr/>
-                <p style={{textAlign:'center', fontSize:'14px', color:'#666'}}>Details</p>
-                <input name="name" placeholder="Name" onChange={handleProfileChange} style={inputStyle} required/>
-                <input name="mobile" placeholder="Mobile" onChange={handleProfileChange} style={inputStyle}/>
-                <input name="city" placeholder="City" onChange={handleProfileChange} style={inputStyle}/>
-                <input name="photo" placeholder="Photo URL" onChange={handleProfileChange} style={inputStyle}/>
-                <input name="religion" placeholder="Religion" onChange={handleProfileChange} style={inputStyle}/>
-                <input name="caste" placeholder="Caste" onChange={handleProfileChange} style={inputStyle}/>
-                <textarea name="bio" placeholder="Bio" onChange={handleProfileChange} style={inputStyle}/>
-              </>
+              <div style={{maxHeight:'300px', overflowY:'auto', paddingRight:'5px', border:'1px solid #eee', padding:'10px'}}>
+                <ProfileFormFields />
+              </div>
             )}
+
             <button type="submit" style={buttonStyle}>{authMode === 'login' ? 'Login' : 'Register'}</button>
           </form>
-          <p onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} style={{textAlign:'center', marginTop:'15px', cursor:'pointer', color:'#007bff'}}>{authMode === 'login' ? "Create Account" : "Login"}</p>
+          
+          <p onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} style={{textAlign:'center', marginTop:'15px', cursor:'pointer', color:'#007bff'}}>
+            {authMode === 'login' ? "New user? Create Account" : "Already have an account? Login"}
+          </p>
         </div>
       </div>
     );
   }
 
-  // RENDER APP
+  // RENDER MAIN APP
   return (
     <div className="App">
       <header className="header" style={{backgroundColor: '#ff4d6d', padding: '15px', color: 'white', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <h2 style={{margin:0}}>💍 Jatav Vivah Sampann</h2>
+        <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+          <img src="https://cdn-icons-png.flaticon.com/512/3662/3662369.png" alt="logo" style={{width:'30px'}}/>
+          <h2 style={{margin:0}}>Jatav Vivah Sampann</h2>
+        </div>
         <div>
-          <span style={{marginRight:'15px'}}>Welcome, {currentUser?.name}</span>
-          <button onClick={handleLogout} style={{padding:'5px 10px', background:'white', color:'#ff4d6d', border:'none', borderRadius:'5px', cursor:'pointer'}}>Logout</button>
+          <span style={{marginRight:'15px', fontSize:'14px'}}>Hi, {currentUser?.name}</span>
+          <button onClick={handleLogout} style={{padding:'5px 10px', background:'white', color:'#ff4d6d', border:'none', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}}>Logout</button>
         </div>
       </header>
 
@@ -152,56 +225,49 @@ function App() {
       </div>
 
       <div className="container" style={{display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', padding:'20px'}}>
-        {/* EDIT FORM */}
+        
+        {/* EDIT FORM MODAL (Show if isEditing is true) */}
         {isEditing && (
-          <div style={{width:'100%', maxWidth:'500px', background:'white', padding:'20px', borderRadius:'10px', border:'2px solid #ff9f1c'}}>
-            <h3>Edit Profile</h3>
-            <form onSubmit={handleSubmit} style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-              <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} style={inputStyle}/>
-              <input name="city" placeholder="City" value={formData.city} onChange={handleChange} style={inputStyle}/>
-              <input name="mobile" placeholder="Mobile" value={formData.mobile} onChange={handleChange} style={inputStyle}/>
-              <input name="photo" placeholder="Photo URL" value={formData.photo} onChange={handleChange} style={inputStyle}/>
-              <input name="religion" placeholder="Religion" value={formData.religion} onChange={handleChange} style={inputStyle}/>
-              <input name="caste" placeholder="Caste" value={formData.caste} onChange={handleChange} style={inputStyle}/>
-              <textarea name="bio" placeholder="Bio" value={formData.bio} onChange={handleChange} style={inputStyle}/>
-              <button type="submit" style={{...buttonStyle, background:'#ff9f1c'}}>Save Changes</button>
-              <button onClick={()=>setIsEditing(false)} style={{...buttonStyle, background:'#666'}}>Cancel</button>
-            </form>
+          <div style={{position:'fixed', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000}}>
+            <div style={{width:'450px', maxHeight:'90vh', overflowY:'auto', background:'white', padding:'20px', borderRadius:'10px'}}>
+              <h3 style={{color:'#ff9f1c'}}>Edit Profile</h3>
+              <form onSubmit={handleSubmit} style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                <ProfileFormFields />
+                <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
+                  <button type="submit" style={{...buttonStyle, background:'#ff9f1c'}}>Save Changes</button>
+                  <button type="button" onClick={()=>setIsEditing(false)} style={{...buttonStyle, background:'#666'}}>Cancel</button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
         {/* PROFILE LIST */}
         {profiles.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
           <div key={u._id} onClick={() => toggleDetails(u._id)} style={{border:'1px solid #ddd', borderRadius: '10px', padding:'15px', width:'300px', background:'white', cursor:'pointer', position:'relative'}}>
-            <button onClick={(e) => handleLike(e, u._id)} style={{position: 'absolute', top: '10px', right: '10px', background: 'white', border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: '5px'}}>❤️ {u.likes || 0}</button>
+            <button onClick={(e) => handleLike(e, u._id)} style={{position: 'absolute', top: '10px', right: '10px', background: 'white', border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: '5px', zIndex:10}}>❤️ {u.likes || 0}</button>
             <div style={{width:'100%', height:'250px', background:'#eee', borderRadius:'5px', overflow:'hidden', marginBottom:'10px'}}>
-               {u.photo ? <img src={u.photo} alt="Profile" style={{width:'100%', height:'100%', objectFit:'cover'}} /> : <div style={{height:'100%', display:'flex', alignItems:'center', justifyContent:'center'}}>No Photo</div>}
+               {u.photo ? <img src={u.photo} alt="Profile" style={{width:'100%', height:'100%', objectFit:'cover'}} /> : <div style={{height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#888'}}>No Photo</div>}
             </div>
             <h3>{u.name}</h3>
             <p style={{color:'#ff4d6d'}}>{u.city}</p>
             
             {expandedProfileId === u._id && (
               <div style={{marginTop:'10px', borderTop:'1px solid #eee', paddingTop:'10px', textAlign:'left', fontSize:'14px'}}>
-                
                 <p><strong>🎂 DOB:</strong> {u.dob}</p>
                 <p><strong>📏 Height:</strong> {u.height}</p>
                 <p><strong>⚖️ Weight:</strong> {u.weight}</p>
                 <p><strong>🎨 Colour:</strong> {u.complexion}</p>
                 <p><strong>🎓 Education:</strong> {u.education} ({u.standard})</p>
-                
                 <hr style={{margin:'5px 0', border:'none', borderTop:'1px dashed #ccc'}}/>
-                
                 <p><strong>👨 Father:</strong> {u.fatherName} ({u.fatherOccupation})</p>
                 <p><strong>👩 Mother:</strong> {u.motherName} ({u.motherOccupation})</p>
                 <p><strong>👫 Siblings:</strong> {u.siblings}</p>
-                
                 <hr style={{margin:'5px 0', border:'none', borderTop:'1px dashed #ccc'}}/>
-
                 <p><strong>🏠 Address:</strong> {u.village}, {u.town}, {u.district}</p>
                 <p><strong>🛐 Religion:</strong> {u.religion} ({u.caste})</p>
                 <p><strong>🥗 Food:</strong> {u.foodType}</p>
                 <p><strong>🎨 Hobbies:</strong> {u.hobbies}</p>
-                
                 <p style={{marginTop:'10px', fontStyle:'italic'}}>"{u.bio}"</p>
                 <p><strong>📞 Mobile:</strong> {u.mobile}</p>
 
@@ -247,7 +313,9 @@ function App() {
   );
 }
 
-const inputStyle = { padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing:'border-box' };
+const inputStyle = { padding: '10px', borderRadius: '5px', border: '1px solid #ccc', width: '100%', boxSizing:'border-box', marginBottom:'5px' };
 const buttonStyle = { padding: '8px', backgroundColor: '#ff4d6d', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', width: '100%', fontSize:'13px' };
+const gridStyle = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' };
+const sectionHeader = { margin: '15px 0 5px', borderBottom: '1px solid #eee', paddingBottom: '5px', color: '#555' };
 
 export default App;
