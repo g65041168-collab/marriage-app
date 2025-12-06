@@ -155,8 +155,20 @@ function App() {
           type="file" 
           accept="image/*"
           onChange={handleImageUpload} 
+          className="form-control"
           style={{ padding: '5px' }}
         />
+
+        {/* This part shows the picture immediately! */}
+        {formData.photo && (
+            <div style={{ marginTop: '10px' }}>
+                <img 
+                    src={formData.photo} 
+                    alt="Preview" 
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #ccc' }} 
+                />
+            </div>
+        )}
       </div>
 
       <h4 style={sectionHeader}>Family</h4>
