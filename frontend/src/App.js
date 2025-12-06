@@ -51,7 +51,18 @@ function App() {
 
   const handleAuthChange = (e) => setAuthData({ ...authData, [e.target.name]: e.target.value });
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-
+  // New function to handle file uploads
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // We use setFormData here because that is what your app uses
+        setFormData({ ...formData, photo: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -138,7 +149,15 @@ function App() {
       </div>
       <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
       <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
-      <input name="photo" placeholder="Photo URL" value={formData.photo} onChange={handleChange} style={inputStyle} />
+          <div style={{ marginBottom: '10px' }}>
+        <label style={{ display: 'block', fontWeight: 'bold' }}>Upload Photo</label>
+        <input 
+          type="file" 
+          accept="image/*"
+          onChange={handleImageUpload} 
+          style={{ padding: '5px' }}
+        />
+      </div>
 
       <h4 style={sectionHeader}>Family</h4>
       <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
