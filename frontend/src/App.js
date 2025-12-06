@@ -52,13 +52,29 @@ function App() {
   const handleAuthChange = (e) => setAuthData({ ...authData, [e.target.name]: e.target.value });
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   // New function to handle file uploads
+  // Smart Image Uploader - Resizes image to prevent Server Errors
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        // We use setFormData here because that is what your app uses
-        setFormData({ ...formData, photo: reader.result });
+      reader.onload = (readerEvent) => {
+        const img = new Image();
+        img.onload = () => {
+          // Resize the image to 300px width
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 300;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // Compress result to 0.7 quality
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setFormData({ ...formData, photo: compressedDataUrl });
+        };
+        img.src = readerEvent.target.result;
       };
       reader.readAsDataURL(file);
     }
