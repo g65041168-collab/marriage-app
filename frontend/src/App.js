@@ -173,10 +173,51 @@ function App() {
         </select>
         <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
       </div>
-      <div style={gridStyle}>
-        <input name="height" placeholder="Height" value={formData.height} onChange={handleChange} style={inputStyle} />
-        <input name="weight" placeholder="Weight" value={formData.weight} onChange={handleChange} style={inputStyle} />
-      </div>
+                          {/* CUSTOM HEIGHT & WEIGHT INPUTS */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '10px' }}>
+                        
+                        {/* Custom Height Input */}
+                        <div style={{ display: 'flex' }}>
+                            <input 
+                                name="height" 
+                                placeholder="Height" 
+                                value={formData.height ? formData.height.split(' ')[0] : ''} 
+                                onChange={(e) => setFormData({...formData, height: `${e.target.value} ${formData.height ? formData.height.split(' ')[1] || 'ft' : 'ft'}`})} 
+                                className="form-control" 
+                                style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }} 
+                            />
+                            <select 
+                                value={formData.height ? formData.height.split(' ')[1] || 'ft' : 'ft'}
+                                onChange={(e) => setFormData({...formData, height: `${formData.height ? formData.height.split(' ')[0] : ''} ${e.target.value}`})}
+                                style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                            >
+                                <option value="ft">ft</option>
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                                <option value="m">m</option>
+                            </select>
+                        </div>
+
+                        {/* Custom Weight Input */}
+                        <div style={{ display: 'flex' }}>
+                            <input 
+                                name="weight" 
+                                placeholder="Weight" 
+                                value={formData.weight ? formData.weight.split(' ')[0] : ''} 
+                                onChange={(e) => setFormData({...formData, weight: `${e.target.value} ${formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}`})} 
+                                className="form-control" 
+                                style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }} 
+                            />
+                            <select 
+                                value={formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}
+                                onChange={(e) => setFormData({...formData, weight: `${formData.weight ? formData.weight.split(' ')[0] : ''} ${e.target.value}`})}
+                                style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                            >
+                                <option value="kg">kg</option>
+                                <option value="lbs">lbs</option>
+                            </select>
+                        </div>
+                    </div>
       <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
       <div style={gridStyle}>
         <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
@@ -286,10 +327,51 @@ function App() {
         </select>
         <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
       </div>
-      <div style={gridStyle}>
-        <input name="height" placeholder="Height" value={formData.height} onChange={handleChange} style={inputStyle} />
-        <input name="weight" placeholder="Weight" value={formData.weight} onChange={handleChange} style={inputStyle} />
-      </div>
+                          {/* CUSTOM HEIGHT & WEIGHT INPUTS */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '10px' }}>
+                        
+                        {/* Custom Height Input */}
+                        <div style={{ display: 'flex' }}>
+                            <input 
+                                name="height" 
+                                placeholder="Height" 
+                                value={formData.height ? formData.height.split(' ')[0] : ''} 
+                                onChange={(e) => setFormData({...formData, height: `${e.target.value} ${formData.height ? formData.height.split(' ')[1] || 'ft' : 'ft'}`})} 
+                                className="form-control" 
+                                style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }} 
+                            />
+                            <select 
+                                value={formData.height ? formData.height.split(' ')[1] || 'ft' : 'ft'}
+                                onChange={(e) => setFormData({...formData, height: `${formData.height ? formData.height.split(' ')[0] : ''} ${e.target.value}`})}
+                                style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                            >
+                                <option value="ft">ft</option>
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                                <option value="m">m</option>
+                            </select>
+                        </div>
+
+                        {/* Custom Weight Input */}
+                        <div style={{ display: 'flex' }}>
+                            <input 
+                                name="weight" 
+                                placeholder="Weight" 
+                                value={formData.weight ? formData.weight.split(' ')[0] : ''} 
+                                onChange={(e) => setFormData({...formData, weight: `${e.target.value} ${formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}`})} 
+                                className="form-control" 
+                                style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }} 
+                            />
+                            <select 
+                                value={formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}
+                                onChange={(e) => setFormData({...formData, weight: `${formData.weight ? formData.weight.split(' ')[0] : ''} ${e.target.value}`})}
+                                style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                            >
+                                <option value="kg">kg</option>
+                                <option value="lbs">lbs</option>
+                            </select>
+                        </div>
+                    </div>
       <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
       <div style={gridStyle}>
         <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
