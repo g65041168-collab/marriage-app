@@ -144,8 +144,27 @@ function App() {
   const openWhatsApp = (e, num) => { e.stopPropagation(); window.open(`https://wa.me/${num}`, '_blank'); };
 
   // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
-  const ProfileFormFields = () => (
-    <>
+  
+
+  // RENDER LOGIN / REGISTER
+  if (!token) {
+    return (
+      <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', backgroundColor:'#fff0f3', padding:'20px'}}>
+        <div style={{background:'white', padding:'30px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.1)', width:'400px'}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', marginBottom:'20px'}}>
+             <span style={{fontSize:'35px'}}>💍</span>
+             <h2 style={{color:'#ff4d6d', margin:0}}>Jatav Vivah Sampann</h2>
+          </div>
+          <h3 style={{textAlign:'center'}}>{authMode === 'login' ? 'Login' : 'Create Account'}</h3>
+          
+          <form onSubmit={authMode === 'login' ? handleLogin : handleRegister} style={{display:'flex', flexDirection:'column', gap:'15px'}}>
+            <input name="email" type="email" placeholder="Email Address" onChange={handleAuthChange} required style={inputStyle} />
+            <input name="password" type="password" placeholder="Password" onChange={handleAuthChange} required style={inputStyle} />
+            
+            {/* Show ALL Profile fields when Registering */}
+            {authMode === 'register' && (
+              <div style={{maxHeight:'300px', overflowY:'auto', paddingRight:'5px', border:'1px solid #eee', padding:'10px'}}>
+                <>
       <h4 style={sectionHeader}>Personal</h4>
       <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required style={inputStyle} />
       <div style={gridStyle}>
@@ -218,27 +237,6 @@ function App() {
       <input name="hobbies" placeholder="Hobbies" value={formData.hobbies} onChange={handleChange} style={inputStyle} />
       <textarea name="bio" placeholder="Bio / About Me" value={formData.bio} onChange={handleChange} style={{...inputStyle, height: '60px'}} />
     </>
-  );
-
-  // RENDER LOGIN / REGISTER
-  if (!token) {
-    return (
-      <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', backgroundColor:'#fff0f3', padding:'20px'}}>
-        <div style={{background:'white', padding:'30px', borderRadius:'10px', boxShadow:'0 4px 10px rgba(0,0,0,0.1)', width:'400px'}}>
-          <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', marginBottom:'20px'}}>
-             <span style={{fontSize:'35px'}}>💍</span>
-             <h2 style={{color:'#ff4d6d', margin:0}}>Jatav Vivah Sampann</h2>
-          </div>
-          <h3 style={{textAlign:'center'}}>{authMode === 'login' ? 'Login' : 'Create Account'}</h3>
-          
-          <form onSubmit={authMode === 'login' ? handleLogin : handleRegister} style={{display:'flex', flexDirection:'column', gap:'15px'}}>
-            <input name="email" type="email" placeholder="Email Address" onChange={handleAuthChange} required style={inputStyle} />
-            <input name="password" type="password" placeholder="Password" onChange={handleAuthChange} required style={inputStyle} />
-            
-            {/* Show ALL Profile fields when Registering */}
-            {authMode === 'register' && (
-              <div style={{maxHeight:'300px', overflowY:'auto', paddingRight:'5px', border:'1px solid #eee', padding:'10px'}}>
-                <ProfileFormFields />
               </div>
             )}
 
@@ -279,7 +277,79 @@ function App() {
             <div style={{width:'450px', maxHeight:'90vh', overflowY:'auto', background:'white', padding:'20px', borderRadius:'10px'}}>
               <h3 style={{color:'#ff9f1c'}}>Edit Profile</h3>
               <form onSubmit={handleSubmit} style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                <ProfileFormFields />
+                <>
+      <h4 style={sectionHeader}>Personal</h4>
+      <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required style={inputStyle} />
+      <div style={gridStyle}>
+        <select name="gender" value={formData.gender} onChange={handleChange} style={inputStyle}>
+          <option value="Male">Male</option><option value="Female">Female</option>
+        </select>
+        <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="height" placeholder="Height" value={formData.height} onChange={handleChange} style={inputStyle} />
+        <input name="weight" placeholder="Weight" value={formData.weight} onChange={handleChange} style={inputStyle} />
+      </div>
+      <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
+      <div style={gridStyle}>
+        <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
+        <input name="standard" placeholder="Class/Grade" value={formData.standard} onChange={handleChange} style={inputStyle} />
+      </div>
+      <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
+      <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
+          <div style={{ marginBottom: '10px' }}>
+        <label style={{ display: 'block', fontWeight: 'bold' }}>Upload Photo</label>
+        <input 
+          type="file" 
+          accept="image/*"
+          onChange={handleImageUpload} 
+          className="form-control"
+          style={{ padding: '5px' }}
+        />
+
+        {/* This part shows the picture immediately! */}
+        {formData.photo && (
+            <div style={{ marginTop: '10px' }}>
+                <img 
+                    src={formData.photo} 
+                    alt="Preview" 
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #ccc' }} 
+                />
+            </div>
+        )}
+      </div>
+
+      <h4 style={sectionHeader}>Family</h4>
+      <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
+      <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
+      <input name="motherName" placeholder="Mother's Name" value={formData.motherName} onChange={handleChange} style={inputStyle} />
+      <input name="siblings" placeholder="Siblings" value={formData.siblings} onChange={handleChange} style={inputStyle} />
+
+      <h4 style={sectionHeader}>Address</h4>
+      <div style={gridStyle}>
+        <input name="village" placeholder="Village" value={formData.village} onChange={handleChange} style={inputStyle} />
+        <input name="town" placeholder="Town" value={formData.town} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="district" placeholder="District" value={formData.district} onChange={handleChange} style={inputStyle} />
+        <input name="city" placeholder="City" value={formData.city} onChange={handleChange} style={inputStyle} />
+      </div>
+      <div style={gridStyle}>
+        <input name="state" placeholder="State" value={formData.state} onChange={handleChange} style={inputStyle} />
+        <input name="country" placeholder="Country" value={formData.country} onChange={handleChange} style={inputStyle} />
+      </div>
+
+      <h4 style={sectionHeader}>Other</h4>
+      <div style={gridStyle}>
+        <input name="religion" placeholder="Religion" value={formData.religion} onChange={handleChange} style={inputStyle} />
+        <input name="caste" placeholder="Caste" value={formData.caste} onChange={handleChange} style={inputStyle} />
+      </div>
+      <select name="foodType" value={formData.foodType} onChange={handleChange} style={inputStyle}>
+          <option value="Veg">Vegetarian</option><option value="Non-Veg">Non-Vegetarian</option><option value="Vegan">Vegan</option>
+      </select>
+      <input name="hobbies" placeholder="Hobbies" value={formData.hobbies} onChange={handleChange} style={inputStyle} />
+      <textarea name="bio" placeholder="Bio / About Me" value={formData.bio} onChange={handleChange} style={{...inputStyle, height: '60px'}} />
+    </>
                 <div style={{display:'flex', gap:'10px', marginTop:'10px'}}>
                   <button type="submit" style={{...buttonStyle, background:'#ff9f1c'}}>Save Changes</button>
                   <button type="button" onClick={()=>setIsEditing(false)} style={{...buttonStyle, background:'#666'}}>Cancel</button>
