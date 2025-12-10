@@ -15,7 +15,7 @@ function App() {
   // Full form state for Registration & Editing
   const initialFormState = {
     name: '', gender: 'Male', dob: '', height: '', weight: '', complexion: '',
-    education: '', standard: '', occupation: '', mobile: '', photo: '', bio: '',
+    education: '', standard: '', occupation: '', mobile: '', photos: [], bio: '',
     religion: '', caste: '', foodType: 'Veg', hobbies: '',
     village: '', town: '', district: '', city: '', state: '', country: '',
     fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '',
@@ -53,31 +53,49 @@ function App() {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   // New function to handle file uploads
   // Smart Image Uploader - Resizes image to prevent Server Errors
+    // NEW: Handle Multiple Image Uploads
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (readerEvent) => {
-        const img = new Image();
-        img.onload = () => {
-          // Resize the image to 300px width
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 300;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-          
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
-          // Compress result to 0.7 quality
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          setFormData({ ...formData, photo: compressedDataUrl });
-        };
-        img.src = readerEvent.target.result;
-      };
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files);
+    
+    if (files.length > 5) {
+        alert("You can only upload up to 5 photos.");
+        return;
     }
+
+    // Process all selected files
+    Promise.all(files.map(file => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (readerEvent) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Resize logic
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 500; 
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Compress and resolve
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = readerEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    })).then(newPhotos => {
+        // Add new photos to the existing list (don't replace them)
+        setFormData({ ...formData, photos: [...(formData.photos || []), ...newPhotos] });
+    });
+  };
+
+  // Helper function to remove a photo before saving
+  const removePhoto = (indexToRemove) => {
+      const updatedPhotos = (formData.photos || []).filter((_, index) => index !== indexToRemove);
+      setFormData({ ...formData, photos: updatedPhotos });
   };
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -295,28 +313,38 @@ function App() {
       </div>
       <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
       <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
-          <div style={{ marginBottom: '10px' }}>
-        <label style={{ display: 'block', fontWeight: 'bold' }}>Upload Photo</label>
-        <input 
-          type="file" 
-          accept="image/*"
-          onChange={handleImageUpload} 
-          className="form-control"
-          style={{ padding: '5px' }}
-        />
-
-        {/* This part shows the picture immediately! */}
-        {formData.photo && (
-            <div style={{ marginTop: '10px' }}>
-                <img 
-                    src={formData.photo} 
-                    alt="Preview" 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #ccc' }} 
-                />
-            </div>
-        )}
-      </div>
-
+                          {/* MULTIPLE PHOTO UPLOAD SECTION */}
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Upload Photos (Max 5)</label>
+                        <input 
+                            type="file" 
+                            multiple // THIS IS THE KEY CHANGE
+                            accept="image/*"
+                            onChange={handleImageUpload} 
+                            className="form-control"
+                            style={{ padding: '5px', marginBottom: '10px' }}
+                        />
+                        
+                        {/* Preview Grid with Remove Buttons */}
+                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '5px' }}>
+                            {formData.photos && formData.photos.map((pic, index) => (
+                                <div key={index} style={{ position: 'relative', flexShrink: 0 }}>
+                                    <img 
+                                        src={pic} 
+                                        alt="preview" 
+                                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '5px', border: '1px solid #ccc' }} 
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => removePhoto(index)}
+                                        style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>   
       <h4 style={sectionHeader}>Family</h4>
       <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
       <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
@@ -506,28 +534,38 @@ function App() {
       </div>
       <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
       <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
-          <div style={{ marginBottom: '10px' }}>
-        <label style={{ display: 'block', fontWeight: 'bold' }}>Upload Photo</label>
-        <input 
-          type="file" 
-          accept="image/*"
-          onChange={handleImageUpload} 
-          className="form-control"
-          style={{ padding: '5px' }}
-        />
-
-        {/* This part shows the picture immediately! */}
-        {formData.photo && (
-            <div style={{ marginTop: '10px' }}>
-                <img 
-                    src={formData.photo} 
-                    alt="Preview" 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #ccc' }} 
-                />
-            </div>
-        )}
-      </div>
-
+                          {/* MULTIPLE PHOTO UPLOAD SECTION */}
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Upload Photos (Max 5)</label>
+                        <input 
+                            type="file" 
+                            multiple // THIS IS THE KEY CHANGE
+                            accept="image/*"
+                            onChange={handleImageUpload} 
+                            className="form-control"
+                            style={{ padding: '5px', marginBottom: '10px' }}
+                        />
+                        
+                        {/* Preview Grid with Remove Buttons */}
+                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '5px' }}>
+                            {formData.photos && formData.photos.map((pic, index) => (
+                                <div key={index} style={{ position: 'relative', flexShrink: 0 }}>
+                                    <img 
+                                        src={pic} 
+                                        alt="preview" 
+                                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '5px', border: '1px solid #ccc' }} 
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => removePhoto(index)}
+                                        style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>   
       <h4 style={sectionHeader}>Family</h4>
       <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
       <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
@@ -572,9 +610,62 @@ function App() {
         {profiles.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
           <div key={u._id} onClick={() => toggleDetails(u._id)} style={{border:'1px solid #ddd', borderRadius: '10px', padding:'15px', width:'300px', background:'white', cursor:'pointer', position:'relative'}}>
             <button onClick={(e) => handleLike(e, u._id)} style={{position: 'absolute', top: '10px', right: '10px', background: 'white', border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: '5px', zIndex:10}}>❤️ {u.likes || 0}</button>
-            <div style={{width:'100%', height:'250px', background:'#eee', borderRadius:'5px', overflow:'hidden', marginBottom:'10px'}}>
-               {u.photo ? <img src={u.photo} alt="Profile" style={{width:'100%', height:'100%', objectFit:'cover'}} /> : <div style={{height:'100%', display:'flex', alignItems:'center', justifyContent:'center', color:'#888'}}>No Photo</div>}
-            </div>
+                              {/* PHOTO SLIDER (Matches your Sketch) */}
+                    <div style={{ position: 'relative', width: '100%', height: '250px', backgroundColor: '#f0f0f0', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
+                        
+                        {/* The Scrollable Container */}
+                        <div 
+                            id={`slider-${u._id}`}
+                            style={{ 
+                                display: 'flex', 
+                                overflowX: 'auto', 
+                                scrollSnapType: 'x mandatory', 
+                                height: '100%',
+                                scrollBehavior: 'smooth',
+                                scrollbarWidth: 'none' /* Hide scrollbar Firefox */
+                            }}
+                            className="hide-scrollbar" // Helper class for hiding scrollbar
+                        >
+                            {/* Show photos if they exist, otherwise show old single photo, otherwise placeholder */}
+                            {(u.photos && u.photos.length > 0 ? u.photos : (u.photo ? [u.photo] : [])).map((pic, i) => (
+                                <img 
+                                    key={i} 
+                                    src={pic} 
+                                    alt="profile" 
+                                    style={{ 
+                                        minWidth: '100%', 
+                                        height: '100%', 
+                                        objectFit: 'cover', 
+                                        scrollSnapAlign: 'center' 
+                                    }} 
+                                />
+                            ))}
+                        </div>
+
+                        {/* LEFT ARROW (<) */}
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent clicking the card
+                                const slider = document.getElementById(`slider-${u._id}`);
+                                if(slider) slider.scrollBy({ left: -300, behavior: 'smooth' });
+                            }}
+                            style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontSize: '18px', zIndex: 10 }}
+                        >
+                            &#10094;
+                        </button>
+
+                        {/* RIGHT ARROW (>) */}
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation(); 
+                                const slider = document.getElementById(`slider-${u._id}`);
+                                if(slider) slider.scrollBy({ left: 300, behavior: 'smooth' });
+                            }}
+                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontSize: '18px', zIndex: 10 }}
+                        >
+                            &#10095;
+                        </button>
+                    </div> 
             <h3>{u.name}</h3>
             <p style={{color:'#ff4d6d'}}>{u.city}</p>
             
