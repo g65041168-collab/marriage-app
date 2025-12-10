@@ -186,32 +186,32 @@ function App() {
         </select>
         <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
       </div>
-                          {/* SMART HEIGHT & WEIGHT SECTION - WITH LABELS */}
-                    <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', alignItems: 'flex-start' }}>
+                           {/* SMART HEIGHT & WEIGHT SECTION - GRID LAYOUT (NO OVERLAP) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '15px' }}>
                         
-                        {/* 1. HEIGHT SECTION */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            {/* THIS IS THE NEW LABEL YOU WANTED */}
+                        {/* 1. HEIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ marginBottom: '5px', fontSize: '12px', color: '#666', fontWeight: 'bold' }}>Height</div>
                             
-                            {/* Unit Selector */}
+                            {/* Height Format Selector */}
                             <select 
                                 value={formData.height && formData.height.includes('cm') ? 'cm' : formData.height && formData.height.includes('m') ? 'm' : 'ft'}
                                 onChange={(e) => {
                                     const newUnit = e.target.value;
                                     setFormData({ ...formData, height: newUnit === 'ft' ? '' : '' }); 
                                 }}
-                                style={{ marginBottom: '5px', padding: '5px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '12px', width: '100%' }}
+                                className="form-control"
+                                style={{ marginBottom: '8px', padding: '5px', fontSize: '12px', width: '100%' }}
                             >
                                 <option value="ft">Format: Feet & Inches</option>
                                 <option value="cm">Format: Centimeters (cm)</option>
                                 <option value="m">Format: Meters (m)</option>
                             </select>
 
-                            {/* Inputs */}
+                            {/* Height Inputs */}
                             {(!formData.height || (!formData.height.includes('cm') && !formData.height.includes('m'))) ? (
-                                <div style={{ display: 'flex', gap: '5px' }}>
-                                    <div style={{ flex: 1 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div>
                                         <input 
                                             placeholder="0" type="number"
                                             value={formData.height ? formData.height.split('ft')[0] : ''}
@@ -220,11 +220,11 @@ function App() {
                                                 const inches = formData.height && formData.height.includes('in') ? formData.height.split('ft')[1].replace('in', '').trim() : '';
                                                 setFormData({ ...formData, height: `${feet}ft ${inches}in` });
                                             }}
-                                            className="form-control" style={{ padding: '8px', width: '100%' }}
+                                            className="form-control" style={{ padding: '8px' }}
                                         />
                                         <div style={{ fontSize: '10px', textAlign: 'center', color: '#888' }}>Feet</div>
                                     </div>
-                                    <div style={{ flex: 1 }}>
+                                    <div>
                                         <input 
                                             placeholder="0" type="number"
                                             value={formData.height && formData.height.includes('in') ? formData.height.split('ft')[1].replace('in', '').trim() : ''}
@@ -233,7 +233,7 @@ function App() {
                                                 const feet = formData.height ? formData.height.split('ft')[0] : '';
                                                 setFormData({ ...formData, height: `${feet}ft ${inches}in` });
                                             }}
-                                            className="form-control" style={{ padding: '8px', width: '100%' }}
+                                            className="form-control" style={{ padding: '8px' }}
                                         />
                                         <div style={{ fontSize: '10px', textAlign: 'center', color: '#888' }}>Inches</div>
                                     </div>
@@ -247,19 +247,20 @@ function App() {
                                             const unit = formData.height.includes('m') ? 'm' : 'cm';
                                             setFormData({ ...formData, height: `${e.target.value} ${unit}` });
                                         }}
-                                        className="form-control" style={{ padding: '8px', width: '100%' }}
+                                        className="form-control" style={{ padding: '8px', flex: 1 }}
                                     />
                                     <span style={{ marginLeft: '5px', fontSize: '12px' }}>{formData.height.includes('m') ? 'm' : 'cm'}</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* 2. WEIGHT SECTION */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        {/* 2. WEIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                              <div style={{ marginBottom: '5px', fontSize: '12px', color: '#666', fontWeight: 'bold' }}>Weight</div>
                              
-                             {/* Spacer to align inputs with Height inputs (since Height has a dropdown above it) */}
-                             <div style={{ height: '36px', marginBottom: '5px' }}></div> 
+                             {/* SPACER: Keeps Weight Input aligned with Feet Input */}
+                             {/* The Height Selector is approx 35px tall + 8px margin = 43px spacer needed */}
+                             <div style={{ height: '43px' }}></div> 
 
                              <div style={{ display: 'flex' }}>
                                 <input 
@@ -270,7 +271,7 @@ function App() {
                                         setFormData({...formData, weight: `${e.target.value} ${unit}`});
                                     }}
                                     className="form-control" 
-                                    style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1, width: '100%' }} 
+                                    style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1, minWidth: '0' }} 
                                 />
                                 <select 
                                     value={formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}
@@ -278,7 +279,7 @@ function App() {
                                         const val = formData.weight ? formData.weight.split(' ')[0] : '';
                                         setFormData({...formData, weight: `${val} ${e.target.value}`});
                                     }}
-                                    style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                                    style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da', width: '60px' }}
                                 >
                                     <option value="kg">Kg</option>
                                     <option value="lbs">Lbs</option>
@@ -286,7 +287,7 @@ function App() {
                              </div>
                         </div>
 
-                    </div>                  
+                    </div>                           
       <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
       <div style={gridStyle}>
         <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
@@ -396,32 +397,32 @@ function App() {
         </select>
         <input name="dob" type="date" placeholder="DOB" value={formData.dob} onChange={handleChange} style={inputStyle} />
       </div>
-                          {/* SMART HEIGHT & WEIGHT SECTION - WITH LABELS */}
-                    <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', alignItems: 'flex-start' }}>
+                          {/* SMART HEIGHT & WEIGHT SECTION - GRID LAYOUT (NO OVERLAP) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '15px' }}>
                         
-                        {/* 1. HEIGHT SECTION */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            {/* THIS IS THE NEW LABEL YOU WANTED */}
+                        {/* 1. HEIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <div style={{ marginBottom: '5px', fontSize: '12px', color: '#666', fontWeight: 'bold' }}>Height</div>
                             
-                            {/* Unit Selector */}
+                            {/* Height Format Selector */}
                             <select 
                                 value={formData.height && formData.height.includes('cm') ? 'cm' : formData.height && formData.height.includes('m') ? 'm' : 'ft'}
                                 onChange={(e) => {
                                     const newUnit = e.target.value;
                                     setFormData({ ...formData, height: newUnit === 'ft' ? '' : '' }); 
                                 }}
-                                style={{ marginBottom: '5px', padding: '5px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '12px', width: '100%' }}
+                                className="form-control"
+                                style={{ marginBottom: '8px', padding: '5px', fontSize: '12px', width: '100%' }}
                             >
                                 <option value="ft">Format: Feet & Inches</option>
                                 <option value="cm">Format: Centimeters (cm)</option>
                                 <option value="m">Format: Meters (m)</option>
                             </select>
 
-                            {/* Inputs */}
+                            {/* Height Inputs */}
                             {(!formData.height || (!formData.height.includes('cm') && !formData.height.includes('m'))) ? (
-                                <div style={{ display: 'flex', gap: '5px' }}>
-                                    <div style={{ flex: 1 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                    <div>
                                         <input 
                                             placeholder="0" type="number"
                                             value={formData.height ? formData.height.split('ft')[0] : ''}
@@ -430,11 +431,11 @@ function App() {
                                                 const inches = formData.height && formData.height.includes('in') ? formData.height.split('ft')[1].replace('in', '').trim() : '';
                                                 setFormData({ ...formData, height: `${feet}ft ${inches}in` });
                                             }}
-                                            className="form-control" style={{ padding: '8px', width: '100%' }}
+                                            className="form-control" style={{ padding: '8px' }}
                                         />
                                         <div style={{ fontSize: '10px', textAlign: 'center', color: '#888' }}>Feet</div>
                                     </div>
-                                    <div style={{ flex: 1 }}>
+                                    <div>
                                         <input 
                                             placeholder="0" type="number"
                                             value={formData.height && formData.height.includes('in') ? formData.height.split('ft')[1].replace('in', '').trim() : ''}
@@ -443,7 +444,7 @@ function App() {
                                                 const feet = formData.height ? formData.height.split('ft')[0] : '';
                                                 setFormData({ ...formData, height: `${feet}ft ${inches}in` });
                                             }}
-                                            className="form-control" style={{ padding: '8px', width: '100%' }}
+                                            className="form-control" style={{ padding: '8px' }}
                                         />
                                         <div style={{ fontSize: '10px', textAlign: 'center', color: '#888' }}>Inches</div>
                                     </div>
@@ -457,19 +458,20 @@ function App() {
                                             const unit = formData.height.includes('m') ? 'm' : 'cm';
                                             setFormData({ ...formData, height: `${e.target.value} ${unit}` });
                                         }}
-                                        className="form-control" style={{ padding: '8px', width: '100%' }}
+                                        className="form-control" style={{ padding: '8px', flex: 1 }}
                                     />
                                     <span style={{ marginLeft: '5px', fontSize: '12px' }}>{formData.height.includes('m') ? 'm' : 'cm'}</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* 2. WEIGHT SECTION */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        {/* 2. WEIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
                              <div style={{ marginBottom: '5px', fontSize: '12px', color: '#666', fontWeight: 'bold' }}>Weight</div>
                              
-                             {/* Spacer to align inputs with Height inputs (since Height has a dropdown above it) */}
-                             <div style={{ height: '36px', marginBottom: '5px' }}></div> 
+                             {/* SPACER: Keeps Weight Input aligned with Feet Input */}
+                             {/* The Height Selector is approx 35px tall + 8px margin = 43px spacer needed */}
+                             <div style={{ height: '43px' }}></div> 
 
                              <div style={{ display: 'flex' }}>
                                 <input 
@@ -480,7 +482,7 @@ function App() {
                                         setFormData({...formData, weight: `${e.target.value} ${unit}`});
                                     }}
                                     className="form-control" 
-                                    style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1, width: '100%' }} 
+                                    style={{ padding: '8px', borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1, minWidth: '0' }} 
                                 />
                                 <select 
                                     value={formData.weight ? formData.weight.split(' ')[1] || 'kg' : 'kg'}
@@ -488,7 +490,7 @@ function App() {
                                         const val = formData.weight ? formData.weight.split(' ')[0] : '';
                                         setFormData({...formData, weight: `${val} ${e.target.value}`});
                                     }}
-                                    style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da' }}
+                                    style={{ padding: '8px', borderLeft: 'none', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, backgroundColor: '#f8f9fa', border: '1px solid #ced4da', width: '60px' }}
                                 >
                                     <option value="kg">Kg</option>
                                     <option value="lbs">Lbs</option>
@@ -496,7 +498,7 @@ function App() {
                              </div>
                         </div>
 
-                    </div>                 
+                    </div>                    
       <input name="complexion" placeholder="Colour/Complexion" value={formData.complexion} onChange={handleChange} style={inputStyle} />
       <div style={gridStyle}>
         <input name="education" placeholder="Education" value={formData.education} onChange={handleChange} style={inputStyle} />
