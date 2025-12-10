@@ -71,7 +71,7 @@ function App() {
                 img.onload = () => {
                     // Resize logic
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500; 
+                    const MAX_WIDTH = 300; 
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scaleSize;
@@ -80,7 +80,7 @@ function App() {
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
                     // Compress and resolve
-                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    resolve(canvas.toDataURL('image/jpeg', 0.5));
                 };
                 img.src = readerEvent.target.result;
             };
