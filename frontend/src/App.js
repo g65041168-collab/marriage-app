@@ -87,18 +87,31 @@ function App() {
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setToken(res.data.token);
       setCurrentUser(res.data.user);
-      alert('Login Successful!');
+    
     } catch (err) { alert('Invalid Credentials'); }
   };
 
-  const handleRegister = async (e) => {
+    const handleRegister = async (e) => {
     e.preventDefault();
     try {
+      // 1. Create the Account
       await axios.post('https://marriage-app-gtge.onrender.com/api/register', { ...authData, ...formData });
-      alert('Registered! Please Login.');
-      setAuthMode('login');
-      setFormData(initialFormState); // Reset form
-    } catch (err) { alert('Registration Failed'); }
+
+      // 2. LOG IN IMMEDIATELY (Auto-Login)
+      const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
+
+      // 3. Save Data & Redirect to Home
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      setToken(res.data.token);
+      setCurrentUser(res.data.user);
+      
+      // Success! No popup needed, user is now inside the app.
+
+    } catch (err) {
+      // We KEEP this popup so they know if it failed
+      alert('Registration Failed! Email might be taken.');
+    }
   };
 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
