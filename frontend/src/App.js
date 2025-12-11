@@ -9,6 +9,8 @@ function App() {
   const [authData, setAuthData] = useState({ email: '', password: '' });
 
   const [profiles, setProfiles] = useState([]);
+    // SPY ON DATA
+  console.log("DEBUG PROFILES:", profiles);
   const [expandedProfileId, setExpandedProfileId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
