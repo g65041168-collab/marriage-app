@@ -126,10 +126,11 @@ function App() {
       
       // Success! No popup needed, user is now inside the app.
 
-    } catch (err) {
-      // We KEEP this popup so they know if it failed
-      alert('Registration Failed! Email might be taken.');
-    }
+      } catch (err) {
+    console.error(err);
+    const message = err.response?.data?.message || err.message || 'Unknown Error';
+    alert('Real Error: ' + message);
+  }
   };
 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
