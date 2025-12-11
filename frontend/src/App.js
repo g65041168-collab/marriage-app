@@ -710,6 +710,10 @@ function App() {
                         </button>
                     </div>        
             <h3>{u.name}</h3>
+            {/* SECRET DATA DUMP */}
+<pre style={{textAlign: 'left', fontSize: '10px', background: '#eee', padding: '5px', overflow: 'scroll', height: '100px'}}>
+    {JSON.stringify(u, null, 2)}
+</pre>
             <p style={{color:'#ff4d6d'}}>{u.city}</p>
             
             {expandedProfileId === u._id && (
