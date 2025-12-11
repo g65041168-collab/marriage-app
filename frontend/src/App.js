@@ -54,49 +54,43 @@ function App() {
   // New function to handle file uploads
   // Smart Image Uploader - Resizes image to prevent Server Errors
     // NEW: Handle Multiple Image Uploads
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (files.length > 5) {
-        alert("You can only upload up to 5 photos.");
-        return;
-    }
+    const handleImageUpload = (e) => {
+    const file = e.target.files[0]; // Just take the first selected file
+    if (!file) return;
 
-    // Process all selected files
-    Promise.all(files.map(file => {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (readerEvent) => {
-                const img = new Image();
-                img.onload = () => {
-                    // Resize logic
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 250; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // Compress and resolve
-                    resolve(canvas.toDataURL('image/jpeg', 0.4));
-                };
-                img.src = readerEvent.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    })).then(newPhotos => {
-        // Add new photos to the existing list (don't replace them)
-        setFormData({ ...formData, photos: [...(formData.photos || []), ...newPhotos] });
-    });
+    // Show a quick alert to prove it works (You can remove this later)
+    // alert("Processing Image..."); 
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+            // Resize to small safe size
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const MAX_WIDTH = 250;
+            const scaleSize = MAX_WIDTH / img.width;
+            canvas.width = MAX_WIDTH;
+            canvas.height = img.height * scaleSize;
+            
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            const base64 = canvas.toDataURL('image/jpeg', 0.5);
+            
+            // Save to State (Populate BOTH array and single string to be safe)
+            setFormData(prev => ({ 
+                ...prev, 
+                photo: base64, 
+                photos: [base64] 
+            }));
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(file);
   };
 
   // Helper function to remove a photo before saving
-  const removePhoto = (indexToRemove) => {
-      const updatedPhotos = (formData.photos || []).filter((_, index) => index !== indexToRemove);
-      setFormData({ ...formData, photos: updatedPhotos });
-  };
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
