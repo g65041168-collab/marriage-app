@@ -71,7 +71,7 @@ function App() {
                 img.onload = () => {
                     // Resize logic
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 300; 
+                    const MAX_WIDTH = 250; 
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scaleSize;
@@ -80,7 +80,7 @@ function App() {
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
                     // Compress and resolve
-                    resolve(canvas.toDataURL('image/jpeg', 0.5));
+                    resolve(canvas.toDataURL('image/jpeg', 0.4));
                 };
                 img.src = readerEvent.target.result;
             };
@@ -162,17 +162,33 @@ function App() {
     } catch (err) { alert('Error sending'); }
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     if (isEditing) {
-      try { await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, formData); alert('Updated!'); setIsEditing(false); fetchProfiles(); } catch (err) { alert('Error'); }
+      try {
+        // Prepare data (ensure photos are included)
+        const payload = { ...formData, photos: formData.photos || [] };
+        
+        // Send Update Request (using the URL from your code)
+        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, payload);
+        
+        // Update the list of profiles instantly on screen
+        setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
+        
+        // If updating your own profile, update local storage too
+        if (currentUser && currentUser._id === currentId) {
+            setCurrentUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+        }
+
+        setIsEditing(false); // Close the modal
+      } catch (err) {
+        console.error(err);
+        // Show a helpful error if it fails (likely file size)
+        alert('Update Failed. Please try uploading fewer or smaller photos.');
+      }
     }
   };
-  const handleEdit = (e, user) => { e.stopPropagation(); setFormData(user); setIsEditing(true); setCurrentId(user._id); window.scrollTo(0,0); };
-  const handleDelete = async (e, id) => { e.stopPropagation(); if(window.confirm("Delete?")) { await axios.delete(`https://marriage-app-gtge.onrender.com/api/delete/${id}`); fetchProfiles(); } };
-  const handleLike = async (e, id) => { e.stopPropagation(); await axios.put(`https://marriage-app-gtge.onrender.com/api/like/${id}`); fetchProfiles(); };
-  const toggleDetails = (id) => setExpandedProfileId(expandedProfileId === id ? null : id);
-  const openWhatsApp = (e, num) => { e.stopPropagation(); window.open(`https://wa.me/${num}`, '_blank'); };
 
   // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
   
