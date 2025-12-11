@@ -112,25 +112,32 @@ function App() {
     const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // 1. Create the Account
-      await axios.post('https://marriage-app-gtge.onrender.com/api/register', { ...authData, ...formData });
+      // TRICK: Convert the list of photos into a single string
+      // This allows us to store multiple photos even if the server only expects one string!
+      const packedPhoto = JSON.stringify(formData.photos || []);
+      
+      const payload = { 
+          ...authData, 
+          ...formData, 
+          photo: packedPhoto, // Send array hidden inside a string
+          photos: undefined 
+      };
 
-      // 2. LOG IN IMMEDIATELY (Auto-Login)
+      await axios.post('https://marriage-app-gtge.onrender.com/api/register', payload);
+      
+      // Auto Login
       const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
-
-      // 3. Save Data & Redirect to Home
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setToken(res.data.token);
       setCurrentUser(res.data.user);
-      
-      // Success! No popup needed, user is now inside the app.
 
-      } catch (err) {
-    console.error(err);
-    const message = err.response?.data?.message || err.message || 'Unknown Error';
-    alert('Real Error: ' + message);
-  }
+    } catch (err) {
+      console.error(err);
+      const message = err.response?.data?.message || err.message || 'Error';
+      alert('Registration Failed: ' + message);
+    }
+  };  
   };
 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
@@ -628,61 +635,84 @@ function App() {
           <div key={u._id} onClick={() => toggleDetails(u._id)} style={{border:'1px solid #ddd', borderRadius: '10px', padding:'15px', width:'300px', background:'white', cursor:'pointer', position:'relative'}}>
             <button onClick={(e) => handleLike(e, u._id)} style={{position: 'absolute', top: '10px', right: '10px', background: 'white', border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', padding: '5px', zIndex:10}}>❤️ {u.likes || 0}</button>
                               {/* PHOTO SLIDER (Matches your Sketch) */}
-                    <div style={{ position: 'relative', width: '100%', height: '250px', backgroundColor: '#f0f0f0', borderRadius: '10px 10px 0 0', overflow: 'hidden' }}>
-                        
-                        {/* The Scrollable Container */}
+                                {/* NEW SLIDER WITH UNPACKING LOGIC */}
+                    <div 
+                        style={{ 
+                            position: 'relative',
+                            width: '100%', 
+                            height: '250px', 
+                            backgroundColor: '#f0f0f0', 
+                            borderRadius: '10px 10px 0 0', 
+                            overflow: 'hidden' 
+                        }}
+                    >
                         <div 
-                            id={`slider-${u._id}`}
+                            id={`inner-slider-${u._id}`}
                             style={{ 
                                 display: 'flex', 
                                 overflowX: 'auto', 
                                 scrollSnapType: 'x mandatory', 
                                 height: '100%',
                                 scrollBehavior: 'smooth',
-                                scrollbarWidth: 'none' /* Hide scrollbar Firefox */
+                                scrollbarWidth: 'none'
                             }}
-                            className="hide-scrollbar" // Helper class for hiding scrollbar
+                            className="hide-scrollbar"
                         >
-                            {/* Show photos if they exist, otherwise show old single photo, otherwise placeholder */}
-                            {(u.photos && u.photos.length > 0 ? u.photos : (u.photo ? [u.photo] : [])).map((pic, i) => (
-                                <img 
-                                    key={i} 
-                                    src={pic} 
-                                    alt="profile" 
-                                    style={{ 
-                                        minWidth: '100%', 
-                                        height: '100%', 
-                                        objectFit: 'cover', 
-                                        scrollSnapAlign: 'center' 
-                                    }} 
-                                />
-                            ))}
+                            {(() => {
+                                // LOGIC TO FIND PHOTOS (Unpacking the suitcase!)
+                                let slides = [];
+                                if (u.photos && u.photos.length > 0) {
+                                    slides = u.photos; // Use real array if available
+                                } else if (u.photo) {
+                                    try {
+                                        // Try to unpack string if it looks like an array
+                                        slides = u.photo.startsWith('[') ? JSON.parse(u.photo) : [u.photo];
+                                    } catch (e) {
+                                        slides = [u.photo];
+                                    }
+                                }
+                                if (slides.length === 0) slides = ['https://via.placeholder.com/300?text=No+Photo'];
+                                
+                                return slides.map((pic, i) => (
+                                    <img 
+                                        key={i} 
+                                        src={pic} 
+                                        alt="profile" 
+                                        style={{ 
+                                            minWidth: '100%', 
+                                            height: '100%', 
+                                            objectFit: 'cover', 
+                                            scrollSnapAlign: 'center' 
+                                        }} 
+                                    />
+                                ));
+                            })()}
                         </div>
 
-                        {/* LEFT ARROW (<) */}
+                        {/* LEFT ARROW */}
                         <button 
                             onClick={(e) => {
-                                e.stopPropagation(); // Prevent clicking the card
-                                const slider = document.getElementById(`slider-${u._id}`);
-                                if(slider) slider.scrollBy({ left: -300, behavior: 'smooth' });
+                                e.stopPropagation();
+                                const s = document.getElementById(`inner-slider-${u._id}`);
+                                if(s) s.scrollBy({ left: -300, behavior: 'smooth' });
                             }}
-                            style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontSize: '18px', zIndex: 10 }}
+                            style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                             &#10094;
                         </button>
 
-                        {/* RIGHT ARROW (>) */}
+                        {/* RIGHT ARROW */}
                         <button 
                             onClick={(e) => {
-                                e.stopPropagation(); 
-                                const slider = document.getElementById(`slider-${u._id}`);
-                                if(slider) slider.scrollBy({ left: 300, behavior: 'smooth' });
+                                e.stopPropagation();
+                                const s = document.getElementById(`inner-slider-${u._id}`);
+                                if(s) s.scrollBy({ left: 300, behavior: 'smooth' });
                             }}
-                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', fontSize: '18px', zIndex: 10 }}
+                            style={{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                             &#10095;
                         </button>
-                    </div> 
+                    </div>        
             <h3>{u.name}</h3>
             <p style={{color:'#ff4d6d'}}>{u.city}</p>
             
