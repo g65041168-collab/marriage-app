@@ -106,19 +106,18 @@ function App() {
     const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // SAFE MODE: Take only the first photo from the list
-      const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
-
+      // DEBUG TEST: Force this specific image URL to be sent
+      const testPhoto = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+      
       const payload = { 
           ...authData, 
           ...formData, 
-          photo: mainPhoto, // Sending just ONE normal photo
-          photos: undefined // Ignore the rest for now
+          photo: testPhoto, // FORCE THE PHOTO
+          photos: undefined 
       };
 
       await axios.post('https://marriage-app-gtge.onrender.com/api/register', payload);
       
-      // Auto Login
       const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -127,10 +126,9 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.message || err.message || 'Error';
-      alert('Registration Failed: ' + msg);
+      alert('Error: ' + err.message);
     }
-  }; 
+  };  
 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
 
