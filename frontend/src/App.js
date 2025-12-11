@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import axios from 'axios';
 import './App.css';
 
@@ -112,15 +112,14 @@ function App() {
     const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // TRICK: Convert the list of photos into a single string
-      // This allows us to store multiple photos even if the server only expects one string!
-      const packedPhoto = JSON.stringify(formData.photos || []);
-      
+      // SAFE MODE: Take only the first photo from the list
+      const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
+
       const payload = { 
           ...authData, 
           ...formData, 
-          photo: packedPhoto, // Send array hidden inside a string
-          photos: undefined 
+          photo: mainPhoto, // Sending just ONE normal photo
+          photos: undefined // Ignore the rest for now
       };
 
       await axios.post('https://marriage-app-gtge.onrender.com/api/register', payload);
@@ -134,11 +133,10 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      const message = err.response?.data?.message || err.message || 'Error';
-      alert('Registration Failed: ' + message);
+      const msg = err.response?.data?.message || err.message || 'Error';
+      alert('Registration Failed: ' + msg);
     }
-  };  
-  };
+  }; 
 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
 
@@ -174,29 +172,33 @@ function App() {
     e.preventDefault();
     if (isEditing) {
       try {
-        // Prepare data (ensure photos are included)
-        const payload = { ...formData, photos: formData.photos || [] };
+        // SAFE MODE: Take only the first photo
+        const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
+
+        const payload = { 
+            ...formData, 
+            photo: mainPhoto, // Sending just ONE normal photo
+            photos: undefined 
+        };
         
-        // Send Update Request (using the URL from your code)
         const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, payload);
         
-        // Update the list of profiles instantly on screen
+        // Update screen immediately
         setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
         
-        // If updating your own profile, update local storage too
+        // Update local storage
         if (currentUser && currentUser._id === currentId) {
             setCurrentUser(res.data);
             localStorage.setItem('user', JSON.stringify(res.data));
         }
 
-        setIsEditing(false); // Close the modal
+        setIsEditing(false); 
       } catch (err) {
         console.error(err);
-        // Show a helpful error if it fails (likely file size)
-        alert('Update Failed. Please try uploading fewer or smaller photos.');
+        alert('Update Failed. Check connection.');
       }
     }
-  };
+  };  
 
   // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
   
