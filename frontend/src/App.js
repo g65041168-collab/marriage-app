@@ -108,13 +108,14 @@ function App() {
     const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // DEBUG TEST: Force this specific image URL to be sent
-      const testPhoto = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-      
+      // Get the photo from the form
+      const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
+
       const payload = { 
           ...authData, 
           ...formData, 
-          photo: testPhoto, // FORCE THE PHOTO
+          img: mainPhoto,   // SEND AS 'img' (Crucial Fix!)
+          photo: mainPhoto, 
           photos: undefined 
       };
 
@@ -128,10 +129,9 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      alert('Error: ' + err.message);
+      alert('Registration Failed: ' + (err.response?.data?.message || err.message));
     }
-  };  
-
+  }; 
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
 
   const openChat = (e, recipient) => {
@@ -162,37 +162,15 @@ function App() {
     } catch (err) { alert('Error sending'); }
   };
 
-    const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isEditing) {
-      try {
-        // SAFE MODE: Take only the first photo
+          // ... inside handleSubmit ...
         const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
 
         const payload = { 
             ...formData, 
-            photo: mainPhoto, // Sending just ONE normal photo
+            img: mainPhoto,   // SEND AS 'img'
+            photo: mainPhoto, 
             photos: undefined 
-        };
-        
-        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, payload);
-        
-        // Update screen immediately
-        setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
-        
-        // Update local storage
-        if (currentUser && currentUser._id === currentId) {
-            setCurrentUser(res.data);
-            localStorage.setItem('user', JSON.stringify(res.data));
-        }
-
-        setIsEditing(false); 
-      } catch (err) {
-        console.error(err);
-        alert('Update Failed. Check connection.');
-      }
-    }
-  };  
+        }; 
 
   // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
   
@@ -654,35 +632,27 @@ function App() {
                             }}
                             className="hide-scrollbar"
                         >
-                            {(() => {
-                                // LOGIC TO FIND PHOTOS (Unpacking the suitcase!)
-                                let slides = [];
-                                if (u.photos && u.photos.length > 0) {
-                                    slides = u.photos; // Use real array if available
-                                } else if (u.photo) {
+                                                    {(() => {
+                                // 1. Check 'photos' array (frontend state)
+                                if (u.photos && u.photos.length > 0) return u.photos.map((pic, i) => <img key={i} src={pic} alt="p" style={{minWidth:'100%', height:'100%', objectFit:'cover', scrollSnapAlign:'center'}} />);
+
+                                // 2. Check 'img' (The database field)
+                                let single = u.img || u.photo;
+
+                                if (single) {
+                                    let slides = [];
                                     try {
-                                        // Try to unpack string if it looks like an array
-                                        slides = u.photo.startsWith('[') ? JSON.parse(u.photo) : [u.photo];
-                                    } catch (e) {
-                                        slides = [u.photo];
-                                    }
+                                        slides = single.startsWith('[') ? JSON.parse(single) : [single];
+                                    } catch (e) { slides = [single]; }
+                                    
+                                    return slides.map((pic, i) => (
+                                        <img key={i} src={pic} alt="profile" style={{minWidth:'100%', height:'100%', objectFit:'cover', scrollSnapAlign:'center'}} />
+                                    ));
                                 }
-                                if (slides.length === 0) slides = ['https://via.placeholder.com/300?text=No+Photo'];
                                 
-                                return slides.map((pic, i) => (
-                                    <img 
-                                        key={i} 
-                                        src={pic} 
-                                        alt="profile" 
-                                        style={{ 
-                                            minWidth: '100%', 
-                                            height: '100%', 
-                                            objectFit: 'cover', 
-                                            scrollSnapAlign: 'center' 
-                                        }} 
-                                    />
-                                ));
-                            })()}
+                                // 3. Fallback
+                                return [<img key="0" src="https://via.placeholder.com/300?text=No+Photo" alt="placeholder" style={{minWidth:'100%', height:'100%', objectFit:'cover', scrollSnapAlign:'center'}} />];
+                            })()}    
                         </div>
 
                         {/* LEFT ARROW */}
