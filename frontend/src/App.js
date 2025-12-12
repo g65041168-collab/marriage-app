@@ -57,39 +57,38 @@ function App() {
   // Smart Image Uploader - Resizes image to prevent Server Errors
     // NEW: Handle Multiple Image Uploads
     const handleImageUpload = (e) => {
-    const file = e.target.files[0]; // Just take the first selected file
-    if (!file) return;
-
-    // Show a quick alert to prove it works (You can remove this later)
-    // alert("Processing Image..."); 
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-            // Resize to small safe size
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const MAX_WIDTH = 250;
-            const scaleSize = MAX_WIDTH / img.width;
-            canvas.width = MAX_WIDTH;
-            canvas.height = img.height * scaleSize;
-            
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            const base64 = canvas.toDataURL('image/jpeg', 0.5);
-            
-            // Save to State (Populate BOTH array and single string to be safe)
-            setFormData(prev => ({ 
-                ...prev, 
-                photo: base64, 
-                photos: [base64] 
-            }));
-        }
+          // 1. Resize Image (Prevents "Registration Failed" error)
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const MAX_WIDTH = 250; // Safe size
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // 2. Convert to Text
+          const base64 = canvas.toDataURL('image/jpeg', 0.5);
+          
+          // 3. Save to State (We save to 'photo' AND 'img' just to be safe!)
+          setFormData({ 
+              ...formData, 
+              photo: base64, 
+              img: base64, 
+              photos: [base64] 
+          }); 
+        };
         img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
     }
-    reader.readAsDataURL(file);
-  };
+  };  
 
   // Helper function to remove a photo before saving
   
@@ -311,38 +310,31 @@ function App() {
       </div>
       <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
       <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
-                          {/* MULTIPLE PHOTO UPLOAD SECTION */}
+                          {/* YOUR UPLOAD CODE */}
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Upload Photos (Max 5)</label>
-                        <input 
-                            type="file" 
-                            multiple // THIS IS THE KEY CHANGE
-                            accept="image/*"
-                            onChange={handleImageUpload} 
-                            className="form-control"
-                            style={{ padding: '5px', marginBottom: '10px' }}
-                        />
-                        
-                        {/* Preview Grid with Remove Buttons */}
-                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '5px' }}>
-                            {formData.photos && formData.photos.map((pic, index) => (
-                                <div key={index} style={{ position: 'relative', flexShrink: 0 }}>
-                                    <img 
-                                        src={pic} 
-                                        alt="preview" 
-                                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '5px', border: '1px solid #ccc' }} 
-                                    />
-                                    <button 
-                                        type="button"
-                                        onClick={() => removePhoto(index)}
-                                        style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                        Upload Photo
+                      </label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="form-control" 
+                        style={{ padding: '5px' }}
+                      />
+                      
+                      {/* PREVIEW */}
+                      {formData.photo && (
+                        <div style={{ marginTop: '10px' }}>
+                            <p style={{fontSize: '12px', color: 'green'}}>Photo Selected:</p>
+                            <img 
+                                src={formData.photo} 
+                                alt="Preview" 
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '2px solid #ddd' }} 
+                            />
                         </div>
-                    </div>   
+                      )}
+                    </div>                  
       <h4 style={sectionHeader}>Family</h4>
       <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
       <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
@@ -532,38 +524,31 @@ function App() {
       </div>
       <input name="occupation" placeholder="Occupation" value={formData.occupation} onChange={handleChange} style={inputStyle} />
       <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} style={inputStyle} />
-                          {/* MULTIPLE PHOTO UPLOAD SECTION */}
+                          {/* YOUR UPLOAD CODE */}
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Upload Photos (Max 5)</label>
-                        <input 
-                            type="file" 
-                            multiple // THIS IS THE KEY CHANGE
-                            accept="image/*"
-                            onChange={handleImageUpload} 
-                            className="form-control"
-                            style={{ padding: '5px', marginBottom: '10px' }}
-                        />
-                        
-                        {/* Preview Grid with Remove Buttons */}
-                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '5px' }}>
-                            {formData.photos && formData.photos.map((pic, index) => (
-                                <div key={index} style={{ position: 'relative', flexShrink: 0 }}>
-                                    <img 
-                                        src={pic} 
-                                        alt="preview" 
-                                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '5px', border: '1px solid #ccc' }} 
-                                    />
-                                    <button 
-                                        type="button"
-                                        onClick={() => removePhoto(index)}
-                                        style={{ position: 'absolute', top: -5, right: -5, background: 'red', color: 'white', borderRadius: '50%', width: '20px', height: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                        Upload Photo
+                      </label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="form-control" 
+                        style={{ padding: '5px' }}
+                      />
+                      
+                      {/* PREVIEW */}
+                      {formData.photo && (
+                        <div style={{ marginTop: '10px' }}>
+                            <p style={{fontSize: '12px', color: 'green'}}>Photo Selected:</p>
+                            <img 
+                                src={formData.photo} 
+                                alt="Preview" 
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '10px', border: '2px solid #ddd' }} 
+                            />
                         </div>
-                    </div>   
+                      )}
+                    </div>                   
       <h4 style={sectionHeader}>Family</h4>
       <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} style={inputStyle} />
       <input name="fatherOccupation" placeholder="Father's Occupation" value={formData.fatherOccupation} onChange={handleChange} style={inputStyle} />
@@ -632,7 +617,7 @@ function App() {
                             }}
                             className="hide-scrollbar"
                         >
-                                                    {(() => {
+                                                   {(() => {
                                 // 1. Check 'photos' array (frontend state)
                                 if (u.photos && u.photos.length > 0) return u.photos.map((pic, i) => <img key={i} src={pic} alt="p" style={{minWidth:'100%', height:'100%', objectFit:'cover', scrollSnapAlign:'center'}} />);
 
@@ -642,6 +627,7 @@ function App() {
                                 if (single) {
                                     let slides = [];
                                     try {
+                                        // Try to unpack if it's a list string
                                         slides = single.startsWith('[') ? JSON.parse(single) : [single];
                                     } catch (e) { slides = [single]; }
                                     
@@ -652,7 +638,7 @@ function App() {
                                 
                                 // 3. Fallback
                                 return [<img key="0" src="https://via.placeholder.com/300?text=No+Photo" alt="placeholder" style={{minWidth:'100%', height:'100%', objectFit:'cover', scrollSnapAlign:'center'}} />];
-                            })()}    
+                            })()}                            
                         </div>
 
                         {/* LEFT ARROW */}
