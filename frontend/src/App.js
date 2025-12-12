@@ -107,15 +107,12 @@ function App() {
     const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      // Get the photo from the form
-      const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
-
       const payload = { 
           ...authData, 
-          ...formData, 
-          img: mainPhoto,   // SEND AS 'img' (Crucial Fix!)
-          photo: mainPhoto, 
-          photos: undefined 
+          ...formData,
+          img: formData.photo, // Send as img
+          photo: formData.photo, // Send as photo
+          photos: undefined
       };
 
       await axios.post('https://marriage-app-gtge.onrender.com/api/register', payload);
@@ -128,9 +125,10 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      alert('Registration Failed: ' + (err.response?.data?.message || err.message));
+      alert('Error: ' + (err.response?.data?.message || err.message));
     }
   }; 
+     
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
 
   const openChat = (e, recipient) => {
@@ -161,16 +159,31 @@ function App() {
     } catch (err) { alert('Error sending'); }
   };
 
-          // ... inside handleSubmit ...
-        const mainPhoto = (formData.photos && formData.photos.length > 0) ? formData.photos[0] : '';
-
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      try {
         const payload = { 
-            ...formData, 
-            img: mainPhoto,   // SEND AS 'img'
-            photo: mainPhoto, 
-            photos: undefined 
-        }; 
-
+            ...formData,
+            img: formData.photo, // Send as img
+            photo: formData.photo, // Send as photo
+            photos: undefined
+        };
+        
+        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, payload);
+        
+        setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
+        if (currentUser && currentUser._id === currentId) {
+            setCurrentUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+        }
+        setIsEditing(false); 
+      } catch (err) {
+        console.error(err);
+        alert('Update Failed.');
+      }
+    }
+  };       
   // --- REUSABLE FORM COMPONENT (Used for both Register & Edit) ---
   
 
