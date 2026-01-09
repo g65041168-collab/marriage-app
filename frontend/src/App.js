@@ -81,8 +81,8 @@ function App() {
       }
 
       // 1. Register
-      await axios.post('https://marriage-app-gtge.onrender.com/api/register', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      // CORRECT
+await axios.post('https://marriage-app-gtge.onrender.com/api/register', data);
       });
 
       // 2. Auto Login
@@ -131,8 +131,8 @@ function App() {
           data.append('photo', selectedFile);
         }
 
-        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, data, {
-           headers: { 'Content-Type': 'multipart/form-data' }
+        // CORRECT
+const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, data);
         });
 
         setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
