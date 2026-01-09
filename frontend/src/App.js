@@ -116,7 +116,7 @@ function App() {
   const handleLogout = () => { localStorage.clear(); setToken(null); setCurrentUser(null); setChatOpen(false); };
 
   // --- 2. FIXED UPDATE FUNCTION (Uses FormData for Image) ---
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     if (isEditing) {
       try {
@@ -130,9 +130,8 @@ function App() {
           data.append('photo', selectedFile);
         }
 
-        // CORRECT
-const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, data);
-        });
+        // CORRECTED: No manual Content-Type header
+        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, data);
 
         setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
         
