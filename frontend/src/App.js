@@ -61,7 +61,7 @@ function App() {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   // --- 1. FIXED REGISTER FUNCTION (Uses FormData for Image) ---
-  const handleRegister = async (e) => {
+ const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const data = new FormData();
@@ -81,9 +81,8 @@ function App() {
       }
 
       // 1. Register
-      // CORRECT
-await axios.post('https://marriage-app-gtge.onrender.com/api/register', data);
-      });
+      // Corrected: Removed manual Content-Type header so browser adds boundary automatically
+      await axios.post('https://marriage-app-gtge.onrender.com/api/register', data);
 
       // 2. Auto Login
       const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
