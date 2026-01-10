@@ -7,12 +7,11 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Allow Vercel to set the Port
+const PORT = process.env.PORT || 5000;
 const JWT_SECRET = 'supersecretkey123';
 
-// Allow the frontend to talk to this backend
 app.use(cors({
-  origin: "*", // Allow all connections (easier for testing)
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -22,19 +21,13 @@ app.use(bodyParser.json());
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// --- DATABASE CONNECTION (Production Ready) ---
-// We use the Standard Link. This will work on Vercel's servers.
-
-const mongoURI = 'mongodb+srv://testuser:testpassword123@cluster0.ccmlvrd.mongodb.net/marriageApp?retryWrites=true&w=majority&appName=Cluster0';
+// --- DATABASE CONNECTION ---
+// UPDATED: Using your NEW password '5QC0YGYV0WsB9G5W'
+const mongoURI = 'mongodb+srv://testuser:5QC0YGYV0WsB9G5W@cluster0.ccmlvrd.mongodb.net/marriageApp?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(mongoURI)
-.then(() => console.log('✅ MongoDB Connected (Cloud Success!)'))
-.catch(err => console.error('❌ MongoDB Error:', err));
-
-// --- SIMPLE ROUTE TO TEST IF SERVER IS ALIVE ---
-app.get('/', (req, res) => {
-  res.send('Backend is Working! MongoDB Connection status: ' + mongoose.connection.readyState);
-});
+.then(() => console.log('✅ MongoDB Connected'))
+.catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
@@ -63,6 +56,10 @@ const Message = mongoose.model('Message', MessageSchema);
 
 // --- ROUTES ---
 
+app.get('/', (req, res) => {
+  res.send(`Server is running. Database Status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+});
+
 app.post('/api/register', upload.single('photo'), async (req, res) => {
   const { email, password, ...profileData } = req.body;
   try {
@@ -88,7 +85,8 @@ app.post('/api/register', upload.single('photo'), async (req, res) => {
 
   } catch (error) {
     console.error("Register Error:", error);
-    res.status(500).json({ error: 'Error registering user' });
+    // Send the real error message to the browser
+    res.status(500).json({ error: error.message }); 
   }
 });
 
@@ -104,13 +102,13 @@ app.post('/api/login', async (req, res) => {
     const token = jwt.sign({ id: user._id }, JWT_SECRET);
     res.json({ token, user }); 
   } catch (error) { 
-    res.status(500).json({ error: 'Login error' }); 
+    res.status(500).json({ error: error.message }); 
   }
 });
 
 app.get('/api/profiles', async (req, res) => {
   try { const profiles = await User.find(); res.json(profiles); } 
-  catch (error) { res.status(500).json({ error: 'Error' }); }
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.put('/api/update/:id', upload.single('photo'), async (req, res) => {
@@ -122,19 +120,18 @@ app.put('/api/update/:id', upload.single('photo'), async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error' });
+    res.status(500).json({ error: error.message });
   }
 });
 
 app.put('/api/like/:id', async (req, res) => {
   try { await User.findByIdAndUpdate(req.params.id, { $inc: { likes: 1 } }); res.json({ message: 'Liked' }); }
-  catch (error) { res.status(500).json({ error: 'Error' }); }
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.delete('/api/delete/:id', async (req, res) => {
   try { await User.findByIdAndDelete(req.params.id); res.json({ message: 'Deleted' }); }
-  catch (error) { res.status(500).json({ error: 'Error' }); }
+  catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post('/api/chat/send', async (req, res) => {
@@ -142,7 +139,7 @@ app.post('/api/chat/send', async (req, res) => {
     const newMessage = new Message(req.body);
     await newMessage.save();
     res.json({ message: 'Sent' });
-  } catch (error) { res.status(500).json({ error: 'Error sending message' }); }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.get('/api/chat/:user1/:user2', async (req, res) => {
@@ -155,7 +152,7 @@ app.get('/api/chat/:user1/:user2', async (req, res) => {
       ]
     }).sort({ timestamp: 1 });
     res.json(messages);
-  } catch (error) { res.status(500).json({ error: 'Error fetching chat' }); }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.listen(PORT, () => { console.log(`Server running on port ${PORT}`); });
