@@ -7,23 +7,34 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // Allow Vercel to set the Port
 const JWT_SECRET = 'supersecretkey123';
 
-app.use(cors());
+// Allow the frontend to talk to this backend
+app.use(cors({
+  origin: "*", // Allow all connections (easier for testing)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// --- DATABASE CONNECTION (Manual Link with Security Bypass) ---
-// We added 'tlsAllowInvalidCertificates=true' to fix the handshake error.
+// --- DATABASE CONNECTION (Production Ready) ---
+// We use the Standard Link. This will work on Vercel's servers.
 
-const mongoURI = 'mongodb://admin:a7OgmpFQ27hPTuC@cluster0-shard-00-00.ccmlvrd.mongodb.net:27017,cluster0-shard-00-01.ccmlvrd.mongodb.net:27017,cluster0-shard-00-02.ccmlvrd.mongodb.net:27017/marriageApp?ssl=true&authSource=admin&tlsAllowInvalidCertificates=true';
+const mongoURI = 'mongodb+srv://testuser:testpassword123@cluster0.ccmlvrd.mongodb.net/marriageApp?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(mongoURI)
-  .then(() => console.log('✅ MongoDB Connected (Manual + SSL Bypass Success!)'))
-  .catch(err => console.log('❌ MongoDB Error:', err));
+.then(() => console.log('✅ MongoDB Connected (Cloud Success!)'))
+.catch(err => console.error('❌ MongoDB Error:', err));
+
+// --- SIMPLE ROUTE TO TEST IF SERVER IS ALIVE ---
+app.get('/', (req, res) => {
+  res.send('Backend is Working! MongoDB Connection status: ' + mongoose.connection.readyState);
+});
 
 // --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
