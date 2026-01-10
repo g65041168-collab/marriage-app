@@ -49,7 +49,7 @@ function App() {
 
   const fetchProfiles = async () => {
     try {
-      const res = await axios.get('https://marriage-app-gtge.onrender.com/api/profiles');
+      const res = await axios.get('https://marriage-app-drab.vercel.app/api/profiles');
       setProfiles(res.data);
     } catch (error) {
       console.error(error);
@@ -82,10 +82,10 @@ function App() {
 
       // 1. Register
       // Corrected: Removed manual Content-Type header so browser adds boundary automatically
-      await axios.post('https://marriage-app-gtge.onrender.com/api/register', data);
+      await axios.post('https://marriage-app-drab.vercel.app/api/register', data);
 
       // 2. Auto Login
-      const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
+      const res = await axios.post('https://marriage-app-drab.vercel.app/api/login', authData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setToken(res.data.token);
@@ -103,7 +103,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://marriage-app-gtge.onrender.com/api/login', authData);
+      const res = await axios.post('https://marriage-app-drab.vercel.app/api/login', authData);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       setToken(res.data.token);
@@ -131,7 +131,7 @@ function App() {
         }
 
         // CORRECTED: No manual Content-Type header
-        const res = await axios.put(`https://marriage-app-gtge.onrender.com/api/update/${currentId}`, data);
+        const res = await axios.put(`https://marriage-app-drab.vercel.app/api/update/${currentId}`, data);
 
         setProfiles(profiles.map(p => p._id === currentId ? res.data : p));
         
@@ -159,7 +159,7 @@ function App() {
 
   const fetchChatHistory = async (recipientEmail) => {
     try {
-      const res = await axios.get(`https://marriage-app-gtge.onrender.com/api/chat/${currentUser.email}/${recipientEmail}`);
+      const res = await axios.get(`https://marriage-app-drab.vercel.app/api/chat/${currentUser.email}/${recipientEmail}`);
       setChatMessages(res.data);
     } catch (err) { console.log(err); }
   };
@@ -168,7 +168,7 @@ function App() {
     e.preventDefault();
     if (!messageText.trim()) return;
     try {
-      await axios.post('https://marriage-app-gtge.onrender.com/api/chat/send', {
+      await axios.post('https://marriage-app-drab.vercel.app/api/chat/send', {
         senderEmail: currentUser.email,
         receiverEmail: chatRecipient.email,
         text: messageText
@@ -189,7 +189,7 @@ function App() {
     e.stopPropagation();
     if(window.confirm("Are you sure you want to delete this profile?")) {
         try {
-            await axios.delete(`https://marriage-app-gtge.onrender.com/api/delete/${id}`);
+            await axios.delete(`https://marriage-app-drab.vercel.app/api/delete/${id}`);
             setProfiles(profiles.filter(p => p._id !== id));
         } catch (err) { alert("Delete failed"); }
     }
