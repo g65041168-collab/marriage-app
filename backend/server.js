@@ -4,7 +4,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// 1. IMPORT MULTER (The tool you just installed)
 const multer = require('multer');
 
 const app = express();
@@ -14,13 +13,16 @@ const JWT_SECRET = 'supersecretkey123';
 app.use(cors());
 app.use(bodyParser.json());
 
-// 2. CONFIGURE MULTER (Store file in memory temporarily)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Database Connection
-mongoose.connect('mongodb+srv://admin:a7OgmpFQ27hPTuC@cluster0.ccmlvrd.mongodb.net/marriageApp?retryWrites=true&w=majority&appName=Cluster0')
-  .then(() => console.log('✅ MongoDB Connected (Cloud)'))
+// --- DATABASE CONNECTION (Manual Link with Security Bypass) ---
+// We added 'tlsAllowInvalidCertificates=true' to fix the handshake error.
+
+const mongoURI = 'mongodb://admin:a7OgmpFQ27hPTuC@cluster0-shard-00-00.ccmlvrd.mongodb.net:27017,cluster0-shard-00-01.ccmlvrd.mongodb.net:27017,cluster0-shard-00-02.ccmlvrd.mongodb.net:27017/marriageApp?ssl=true&authSource=admin&tlsAllowInvalidCertificates=true';
+
+mongoose.connect(mongoURI)
+  .then(() => console.log('✅ MongoDB Connected (Manual + SSL Bypass Success!)'))
   .catch(err => console.log('❌ MongoDB Error:', err));
 
 // --- SCHEMAS ---
@@ -29,7 +31,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: String, gender: String, dob: String, height: String, weight: String, complexion: String,
   education: String, standard: String, occupation: String, mobile: String, 
-  photo: String, // We will store the image here as a long text string (Base64)
+  photo: String, 
   bio: String,
   religion: String, caste: String, foodType: String, hobbies: String,
   village: String, town: String, district: String, city: String, state: String, country: String,
@@ -50,21 +52,16 @@ const Message = mongoose.model('Message', MessageSchema);
 
 // --- ROUTES ---
 
-// Auth Register (Now handles Image Upload)
 app.post('/api/register', upload.single('photo'), async (req, res) => {
-  // Access text data via req.body
   const { email, password, ...profileData } = req.body;
-  
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. CONVERT IMAGE TO BASE64 STRING
     let photoBase64 = '';
     if (req.file) {
-      // Convert buffer to base64
       photoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
@@ -72,7 +69,7 @@ app.post('/api/register', upload.single('photo'), async (req, res) => {
       email, 
       password: hashedPassword, 
       ...profileData,
-      photo: photoBase64 // Save the image string
+      photo: photoBase64 
     });
 
     await newUser.save();
@@ -94,33 +91,23 @@ app.post('/api/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: 'Invalid Credentials' });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET);
-    res.json({ token, user }); // Sending full user data back
+    res.json({ token, user }); 
   } catch (error) { 
     res.status(500).json({ error: 'Login error' }); 
   }
 });
 
-// Profiles
 app.get('/api/profiles', async (req, res) => {
-  try { 
-    const profiles = await User.find(); 
-    res.json(profiles); 
-  } catch (error) { 
-    res.status(500).json({ error: 'Error' }); 
-  }
+  try { const profiles = await User.find(); res.json(profiles); } 
+  catch (error) { res.status(500).json({ error: 'Error' }); }
 });
 
-// Update Profile (Now handles Image Upload)
 app.put('/api/update/:id', upload.single('photo'), async (req, res) => {
   try {
     const updateData = { ...req.body };
-
-    // If a new file is uploaded, convert it and add to update data
     if (req.file) {
        updateData.photo = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
-
-    // Using {new: true} to return the updated document
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(updatedUser);
   } catch (error) {
@@ -139,9 +126,6 @@ app.delete('/api/delete/:id', async (req, res) => {
   catch (error) { res.status(500).json({ error: 'Error' }); }
 });
 
-
-// --- CHAT ROUTES ---
-
 app.post('/api/chat/send', async (req, res) => {
   try {
     const newMessage = new Message(req.body);
@@ -153,13 +137,12 @@ app.post('/api/chat/send', async (req, res) => {
 app.get('/api/chat/:user1/:user2', async (req, res) => {
   try {
     const { user1, user2 } = req.params;
-    // Find messages where sender is User1 AND receiver is User2, OR vice versa
     const messages = await Message.find({
       $or: [
         { senderEmail: user1, receiverEmail: user2 },
         { senderEmail: user2, receiverEmail: user1 }
       ]
-    }).sort({ timestamp: 1 }); // Oldest first
+    }).sort({ timestamp: 1 });
     res.json(messages);
   } catch (error) { res.status(500).json({ error: 'Error fetching chat' }); }
 });
