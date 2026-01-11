@@ -155,4 +155,13 @@ app.get('/api/chat/:user1/:user2', async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-app.listen(PORT, () => { console.log(`Server running on port ${PORT}`); });
+// --- VERCEL CONFIGURATION ---
+// 1. Export the app so Vercel can run it as a Serverless Function
+module.exports = app;
+
+// 2. Keep this local listener for when you run 'node server.js' on your laptop
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
