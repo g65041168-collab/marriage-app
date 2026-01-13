@@ -15,7 +15,14 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-
+// --- URL TRANSLATOR ---
+// This removes '/api' so your server sees '/register' instead of '/api/register'
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api')) {
+    req.url = req.url.replace('/api', '');
+  }
+  next();
+});
 app.use(bodyParser.json());
 
 const storage = multer.memoryStorage();
