@@ -15,14 +15,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-// --- URL TRANSLATOR ---
-// This removes '/api' so your server sees '/register' instead of '/api/register'
-app.use((req, res, next) => {
-  if (req.url.startsWith('/api')) {
-    req.url = req.url.replace('/api', '');
-  }
-  next();
-});
+
 app.use(bodyParser.json());
 
 const storage = multer.memoryStorage();
@@ -67,7 +60,7 @@ app.get('/', (req, res) => {
   res.send(`Server is running. Database Status: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
 });
 
-app.post('/api/register', upload.single('photo'), async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const { email, password, ...profileData } = req.body;
   try {
     const existingUser = await User.findOne({ email });
