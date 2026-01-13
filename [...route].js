@@ -160,7 +160,14 @@ app.get('/api/chat/:user1/:user2', async (req, res) => {
 module.exports = app;
 
 // 2. Keep this local listener for when you run 'node server.js' on your laptop
+if (require.main === module) 
+  // --- VERCEL CONFIGURATION ---
+// Essential: Export the app for Vercel
+module.exports = app;
+
+// Optional: Only listen if running locally
 if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
