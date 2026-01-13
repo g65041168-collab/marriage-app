@@ -353,7 +353,7 @@ function App() {
         )}
 
         {/* PROFILE LIST */}
-        {profiles.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
+        {(Array.isArray(profiles) ? profiles : []).filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase())).map(u => (
           <div key={u._id} onClick={() => toggleDetails(u._id)} style={{border:'1px solid #ddd', borderRadius:'10px', padding:'15px', width:'300px', background:'white', boxShadow:'0 2px 5px rgba(0,0,0,0.05)', cursor:'pointer'}}>
              
              {/* IMAGE DISPLAY LOGIC */}
